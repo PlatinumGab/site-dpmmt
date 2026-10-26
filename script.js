@@ -17,6 +17,19 @@ navigation.addEventListener('click', (event) => {
 document.querySelector('#year').textContent = new Date().getFullYear();
 const researcherGrid = document.querySelector('.unit-grid');
 if (researcherGrid) {
+  const orcidIds = {
+    'marielle karine bouyou akotet': '0000-0002-7992-4630',
+    'denise patricia mawili mboumba': '0000-0002-4554-4365',
+    'noe patrick mbondoukwe': '0000-0002-4994-3355',
+    'bridy chesly moutoumbi ditombi': '0000-0001-7811-2334',
+    'jacques mari ndong ngomo': '0000-0002-3880-7323',
+    'bedrich pongui ngondza': '0000-0002-5109-3177',
+    'koumba lengongo': '0000-0002-5919-4511',
+    'ornella anaise mbang nguema': '0000-0002-6884-9428',
+    'bisseye': '0000-0002-6888-6317',
+    'mickala patrick': '0000-0002-5376-0906'
+  };
+  const normalizeName = (value) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[’']/g, '').toLowerCase().replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, ' ').trim();
   const profileDialog = document.createElement('dialog');
   profileDialog.className = 'researcher-dialog';
   profileDialog.setAttribute('aria-labelledby', 'researcher-dialog-name');
@@ -73,9 +86,11 @@ if (researcherGrid) {
         photoArea.append(fallback);
       }
       const query = encodeURIComponent(name);
+      const normalizedName = normalizeName(name);
+      const orcidId = Object.entries(orcidIds).find(([person]) => normalizedName.includes(person))?.[1];
       const links = [
         ['PubMed', `https://pubmed.ncbi.nlm.nih.gov/?term=${query}`],
-        ['ORCID', `https://orcid.org/orcid-search/search?searchQuery=${query}`],
+        ['ORCID', orcidId ? `https://orcid.org/${orcidId}` : `https://orcid.org/orcid-search/search?searchQuery=${query}`],
         ['ResearchGate', `https://www.researchgate.net/search/researcher?q=${query}`]
       ];
       const linksContainer = profileDialog.querySelector('.researcher-links');

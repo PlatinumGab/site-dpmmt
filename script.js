@@ -141,3 +141,94 @@ if (researcherGrid) {
     });
   });
 }
+
+const mentoringGrid = document.querySelector('.mentoring-grid');
+if (mentoringGrid) {
+  const studentDialog = document.createElement('dialog');
+  studentDialog.className = 'student-list-dialog';
+  studentDialog.setAttribute('aria-labelledby', 'student-list-title');
+  studentDialog.innerHTML = '<button class="student-list-close" type="button" aria-label="Fermer">×</button><h2 id="student-list-title"></h2><div class="student-list-content"></div>';
+  document.body.append(studentDialog);
+
+  studentDialog.querySelector('.student-list-close').addEventListener('click', () => studentDialog.close());
+  studentDialog.addEventListener('click', (event) => {
+    if (event.target === studentDialog) studentDialog.close();
+  });
+
+  let studentRecordsPromise;
+  const loadStudentRecords = () => {
+    if (!studentRecordsPromise) {
+      studentRecordsPromise = fetch('assets/encadrements-etudiants.json')
+        .then((response) => {
+          if (!response.ok) throw new Error('Impossible de charger le fichier des encadrements.');
+          return response.json();
+        })
+        .then((data) => data.records || []);
+    }
+    return studentRecordsPromise;
+  };
+
+  const content = studentDialog.querySelector('.student-list-content');
+  mentoringGrid.querySelectorAll('[data-student-category]').forEach((trigger) => {
+    trigger.addEventListener('click', async () => {
+      const category = trigger.dataset.studentCategory;
+      const label = trigger.dataset.studentLabel || trigger.querySelector('b')?.textContent.trim() || 'Étudiants encadrés';
+      studentDialog.querySelector('#student-list-title').textContent = label;
+      content.replaceChildren();
+      const loading = document.createElement('p');
+      loading.className = 'student-list-message';
+      loading.textContent = 'Chargement de la liste…';
+      content.append(loading);
+      studentDialog.showModal();
+
+      try {
+        const records = await loadStudentRecords();
+        const matchingRecords = records.filter((record) => record.category === category);
+        content.replaceChildren();
+        if (!matchingRecords.length) {
+          const empty = document.createElement('p');
+          empty.className = 'student-list-message';
+          empty.textContent = category === 'DES'
+            ? 'Aucun travail de catégorie DES ne figure dans le classeur fourni.'
+            : 'Aucun étudiant n’est renseigné pour cette catégorie dans le classeur fourni.';
+          content.append(empty);
+          return;
+        }
+
+        const groupedByYear = new Map();
+        matchingRecords.forEach((record) => {
+          const year = String(record.year || 'Année non renseignée');
+          if (!groupedByYear.has(year)) groupedByYear.set(year, []);
+          groupedByYear.get(year).push(record);
+        });
+
+        [...groupedByYear.entries()]
+          .sort(([yearA], [yearB]) => Number(yearB) - Number(yearA))
+          .forEach(([year, yearRecords]) => {
+            const section = document.createElement('section');
+            section.className = 'student-year-group';
+            const heading = document.createElement('h3');
+            heading.textContent = year;
+            const list = document.createElement('ul');
+            yearRecords.forEach((record) => {
+              const item = document.createElement('li');
+              const author = document.createElement('strong');
+              author.textContent = record.author || 'Auteur non renseigné';
+              const title = document.createElement('span');
+              title.textContent = record.title || 'Titre non renseigné';
+              item.append(author, title);
+              list.append(item);
+            });
+            section.append(heading, list);
+            content.append(section);
+          });
+      } catch (error) {
+        content.replaceChildren();
+        const message = document.createElement('p');
+        message.className = 'student-list-message student-list-error';
+        message.textContent = 'La liste ne peut pas être chargée pour le moment. Vérifiez que le fichier des encadrements a bien été ajouté au dossier assets.';
+        content.append(message);
+      }
+    });
+  });
+}

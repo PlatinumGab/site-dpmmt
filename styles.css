@@ -31,6 +31,10 @@
 .member-card img,.member-avatar{display:grid;place-items:center;width:54px;height:54px;flex:none;border:2px solid #fff;border-radius:50%;background:linear-gradient(135deg,#d8f3e6,#81bddd);color:#06428f;object-fit:cover;box-shadow:0 0 0 1px #b5d8ee;font:800 14px Manrope,sans-serif}
 .member-card h4{margin:1px 0 5px;color:#092d86;font:800 14px/1.3 Manrope,sans-serif}
 .member-card p{margin:0;color:#52617a;font-size:11px;line-height:1.45}
+.member-social-links{display:flex;align-items:center;gap:9px;margin-top:9px}
+.member-social-links a{display:inline-flex;align-items:center;justify-content:center;min-width:25px;min-height:25px;border-radius:6px}
+.member-social-links a:hover,.member-social-links a:focus-visible{outline:2px solid #078532;outline-offset:2px}
+.member-social-links img{display:block;width:auto;height:23px;max-width:60px;border:0;border-radius:0;background:transparent;object-fit:contain;box-shadow:none}
 .team-support-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:28px}
 .team-support-grid .team-group{margin:0;padding:18px;border:1px solid #bfe3f4;border-radius:13px;background:#fff}
 .team-support-grid .team-group>h3{font-size:19px}
@@ -76,5 +80,6 @@
 .researcher-dialog-help{margin:14px 0 10px;color:#58657d}
 .researcher-links{display:flex;flex-wrap:wrap;gap:9px}
 .researcher-links a{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:8px 15px;border-radius:999px;background:#073c9d;color:#fff;font-weight:700}
+.researcher-links img{width:auto;height:23px;max-width:64px;border:0;border-radius:0;background:transparent;object-fit:contain;box-shadow:none}
 .researcher-links a:hover,.researcher-links a:focus-visible{background:#078532;outline:2px solid #078532;outline-offset:2px}
 @media(max-width:600px){.researcher-open img,.researcher-initials{width:64px;height:64px}.researcher-name{font-size:13px}.researcher-dialog{padding:48px 20px 24px}.researcher-dialog-content{grid-template-columns:1fr;gap:18px}.researcher-dialog-photo{min-height:170px}.researcher-dialog-photo img{max-height:300px}}

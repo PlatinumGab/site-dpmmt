@@ -19,13 +19,13 @@ const orcidIds = {
   'marielle karine bouyou akotet': '0000-0002-7992-4630',
   'denise patricia mawili mboumba': '0000-0002-4554-4365',
   'mbondoukwe': '0000-0002-4994-3355',
-  'bridy chesly moutoumbi ditombi': '0000-0001-7811-2334',
+  'bridy chesly moutombi ditombi': '0000-0001-7811-2334',
   'jacques mari ndong ngomo': '0000-0002-3880-7323',
   'bedrich pongui ngondza': '0000-0002-5109-3177',
-  'koumba lengongo': '0000-0002-5919-4511',
+  'vanessa koumba lengongo': '0000-0002-5919-4511',
   'ornella anaise mbang nguema': '0000-0002-6884-9428',
-  'bisseye': '0000-0002-6888-6317',
-  'mickala patrick': '0000-0002-5376-0906'
+  'cyrille bisseye': '0000-0002-6888-6317',
+  'patrick mickala': '0000-0002-5376-0906'
 };
 const normalizeName = (value) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[’']/g, '').toLowerCase().replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, ' ').trim();
 const profileLinksFor = (name) => {

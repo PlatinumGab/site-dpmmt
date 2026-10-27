@@ -163,7 +163,7 @@ if (mentoringGrid) {
           if (!response.ok) throw new Error('Impossible de charger le fichier des encadrements.');
           return response.json();
         })
-        .then((data) => data.records || []);
+        .then((data) => data);
     }
     return studentRecordsPromise;
   };
@@ -182,7 +182,26 @@ if (mentoringGrid) {
       studentDialog.showModal();
 
       try {
-        const records = await loadStudentRecords();
+        const data = await loadStudentRecords();
+        const records = data.records || [];
+        if (category === 'PHD') {
+          content.replaceChildren();
+          const names = data.phdNames || [];
+          if (names.length) {
+            const note = document.createElement('p');
+            note.className = 'student-list-message';
+            note.textContent = 'Personnes signalées comme PhD. Le classeur transmis ne précise pas ici les années ni les titres de thèse de doctorat.';
+            const list = document.createElement('ul');
+            list.className = 'student-name-list';
+            names.forEach((name) => {
+              const item = document.createElement('li');
+              item.textContent = name;
+              list.append(item);
+            });
+            content.append(note, list);
+          }
+          return;
+        }
         const matchingRecords = records.filter((record) => record.category === category);
         content.replaceChildren();
         if (!matchingRecords.length) {

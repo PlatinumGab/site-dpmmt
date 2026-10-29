@@ -41,7 +41,7 @@ const profileLinksFor = (name) => {
 
 document.querySelectorAll('.member-grid .member-card').forEach((card) => {
   const name = card.querySelector('h4')?.textContent.trim();
-  if (!name || card.querySelector('.member-social-links')) return;
+  if (!name || normalizeName(name).includes('beatrice mozogo') || card.querySelector('.member-social-links')) return;
   const links = document.createElement('div');
   links.className = 'member-social-links';
   profileLinksFor(name).forEach(([label, href, icon]) => {

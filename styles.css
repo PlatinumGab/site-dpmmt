@@ -40,6 +40,7 @@
 .team-support-grid .team-group>h3{font-size:19px}
 .team-duty{margin-top:16px}
 .team-duty h4{margin:0 0 9px;color:#08764a;font-size:14px;font-weight:750}
+.team-role-label{margin:12px 0 8px;color:#52617a;font-size:13px;font-weight:700}
 .team-directory{display:grid;grid-template-columns:1fr;gap:10px;margin:0;padding:0;list-style:none}
 .team-directory li{position:relative;display:flex;flex-direction:column;gap:2px;padding-left:18px;color:#20365e;font-size:13px;line-height:1.4}
 .team-directory li:before{position:absolute;left:0;top:0;color:#078532;content:'✓';font-weight:800}

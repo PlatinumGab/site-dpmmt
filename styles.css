@@ -35,12 +35,16 @@
 .member-social-links a{display:inline-flex;align-items:center;justify-content:center;min-width:25px;min-height:25px;border-radius:6px}
 .member-social-links a:hover,.member-social-links a:focus-visible{outline:2px solid #078532;outline-offset:2px}
 .member-social-links img{display:block;width:auto;height:23px;max-width:60px;border:0;border-radius:0;background:transparent;object-fit:contain;box-shadow:none}
-.team-support-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:28px}
+.team-support-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:28px}
 .team-support-grid .team-group{margin:0;padding:18px;border:1px solid #bfe3f4;border-radius:13px;background:#fff}
 .team-support-grid .team-group>h3{font-size:19px}
-.team-directory{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px 18px;margin:0;padding:0;list-style:none}
-.team-directory li{position:relative;padding-left:18px;color:#20365e;font-size:13px;line-height:1.4}
+.team-duty{margin-top:16px}
+.team-duty h4{margin:0 0 9px;color:#08764a;font-size:14px;font-weight:750}
+.team-directory{display:grid;grid-template-columns:1fr;gap:10px;margin:0;padding:0;list-style:none}
+.team-directory li{position:relative;display:flex;flex-direction:column;gap:2px;padding-left:18px;color:#20365e;font-size:13px;line-height:1.4}
 .team-directory li:before{position:absolute;left:0;top:0;color:#078532;content:'✓';font-weight:800}
+.team-directory li strong{font-weight:750}
+.team-directory li span{color:#52617a;font-size:12px}
 /* Page navigation and CREIPA governance */
 .nav-inner nav{flex-wrap:wrap;justify-content:center}
 @media(min-width:701px) and (max-width:1100px){.nav-inner nav{gap:2px}.nav-inner nav a{font-size:10px;padding:8px 5px}}
@@ -50,7 +54,7 @@
 .team-doctors{color:#52617a}
 @media(max-width:700px){.nav-inner nav{flex-wrap:nowrap}}
 @media(max-width:1050px){.member-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.professor-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
-@media(max-width:700px){.team-group{margin-top:22px}.member-grid,.professor-grid,.assistant-grid,.former-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.member-card{gap:9px;padding:10px;min-height:94px}.member-card img,.member-avatar{width:44px;height:44px}.member-card h4{font-size:12px}.member-card p{font-size:10px}.team-support-grid{grid-template-columns:1fr;gap:12px}.team-directory{grid-template-columns:1fr 1fr;gap:9px 12px}.team-directory li{font-size:12px}}
+@media(max-width:700px){.team-group{margin-top:22px}.member-grid,.professor-grid,.assistant-grid,.former-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.member-card{gap:9px;padding:10px;min-height:94px}.member-card img,.member-avatar{width:44px;height:44px}.member-card h4{font-size:12px}.member-card p{font-size:10px}.team-support-grid{grid-template-columns:1fr;gap:12px}.team-directory{grid-template-columns:1fr;gap:9px 12px}.team-directory li{font-size:12px}}
 @media(max-width:460px){.member-grid,.professor-grid,.assistant-grid,.former-grid{grid-template-columns:1fr}.member-card{min-height:76px}.team-directory{grid-template-columns:1fr}}
 
 

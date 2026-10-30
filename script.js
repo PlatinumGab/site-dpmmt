@@ -28,12 +28,33 @@ const orcidIds = {
   'patrick mickala': '0000-0002-5376-0906'
 };
 const normalizeName = (value) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[’']/g, '').toLowerCase().replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, ' ').trim();
+const cleanAuthorName = (value) => value.replace(/\b(?:Dr|Pr|Prof(?:esseur)?|Docteur|M(?:me|r|lle))\.?\s*/gi, '').replace(/\s+/g, ' ').trim();
+const pubmedSearchFor = (name) => {
+  const clean = cleanAuthorName(name).replace(/[’']/g, ' ').replace(/\s+/g, ' ').trim();
+  const words = clean.split(' ').filter(Boolean);
+  const initials = words.slice(0, -1).map((word) => word[0]).join('');
+  const surname = words.at(-1) || clean;
+  const surnamePair = words.slice(-2).join(' ');
+  const variants = new Set([clean, clean.replace(/-/g, ' '), clean.replace(/\s+/g, '-')]);
+  if (initials) {
+    variants.add(`${initials} ${surname}`);
+    variants.add(`${initials} ${surnamePair}`);
+  }
+  variants.add(surname);
+  if (words.length > 1) {
+    variants.add(surnamePair);
+    variants.add(words.slice(-2).join('-'));
+  }
+  const terms = [...variants].map((variant) => `"${variant}"[Author]`);
+  return `https://pubmed.ncbi.nlm.nih.gov/?term=${encodeURIComponent(terms.join(' OR '))}`;
+};
 const profileLinksFor = (name) => {
-  const query = encodeURIComponent(name);
-  const normalizedName = normalizeName(name);
+  const cleanName = cleanAuthorName(name);
+  const query = encodeURIComponent(cleanName);
+  const normalizedName = normalizeName(cleanName);
   const orcidId = Object.entries(orcidIds).find(([person]) => normalizedName.includes(person))?.[1];
   return [
-    ['PubMed', `https://pubmed.ncbi.nlm.nih.gov/?term=${query}`, 'assets/logo-pubmed.png'],
+    ['PubMed', pubmedSearchFor(cleanName), 'assets/logo-pubmed.png'],
     ['ORCID', orcidId ? `https://orcid.org/${orcidId}` : `https://orcid.org/orcid-search/search?searchQuery=${query}`, 'assets/logo-orcid.png'],
     ['ResearchGate', `https://www.researchgate.net/search/researcher?q=${query}`, 'assets/logo-researchgate.png']
   ];

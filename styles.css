@@ -179,3 +179,24 @@
 .publication-list li strong{color:#103b83}
 @media(max-width:700px){.publication-list{grid-template-columns:1fr}.publication-list li{padding:14px 14px 14px 50px}}
 .partner-logos-section{margin-top:20px;padding-top:14px;border-top:1px solid #d7e9f8}.partner-logos-section h4{margin:0 0 12px;color:#073a98}.partner-logo-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.partner-logo-grid figure{display:flex;min-height:100px;margin:0;padding:12px;align-items:center;justify-content:center;flex-direction:column;gap:7px;border:1px solid #d7e9f8;border-radius:10px;background:#fff}.partner-logo-grid img{max-width:100%;height:56px;object-fit:contain}.partner-logo-grid figcaption{color:#52627b;font-size:12px;text-align:center}.mobility-details{display:grid;gap:26px;margin-top:32px}.mobility-details section{padding:22px;border:1px solid #cfe5f8;border-radius:14px;background:#fff}.mobility-details h3{margin:0 0 14px;color:#073a98;font:700 22px Manrope,sans-serif}.table-scroll{overflow-x:auto}.mobility-details table{width:100%;border-collapse:collapse;font-size:14px}.mobility-details th,.mobility-details td{padding:10px 12px;border-bottom:1px solid #d7e9f8;text-align:left;vertical-align:top}.mobility-details th{background:#edf6fc;color:#073a98}.mobility-details tr:last-child td{border-bottom:0}.mobility-note{margin:0;color:#58657d;font-size:13px}@media(max-width:700px){.partner-logo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.mobility-details section{padding:15px}.mobility-details table{min-width:680px}}
+
+/* Présentation cohérente des unités de recherche et lecture mobile */
+.unit-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:stretch}
+.unit-card{display:flex;min-width:0;min-height:100%;flex-direction:column;padding:16px;border-radius:13px;box-shadow:0 3px 12px rgba(7,59,142,.06)}
+.unit-card h4{min-height:2.5em;margin:0 0 8px;font-size:16px;line-height:1.35;overflow-wrap:anywhere}
+.unit-card p{margin:0 0 8px;font-size:13px;line-height:1.5}
+.unit-card ul{display:grid;gap:7px;margin:7px 0 0;padding:0;list-style:none;color:#152956;font-size:13px;line-height:1.45}
+.unit-card li:not(.staff-member){padding:8px 10px;border:1px solid rgba(7,59,142,.12);border-radius:9px;background:rgba(255,255,255,.76);overflow-wrap:anywhere}
+.unit-card .staff-member{display:flex;align-items:center;gap:10px;min-width:0;margin:0;padding:7px 9px;border:1px solid rgba(7,59,142,.12);border-radius:9px;background:rgba(255,255,255,.82)}
+.unit-card .staff-member img{width:46px;height:46px}
+.unit-card .staff-member span{min-width:0;font-size:13px;font-weight:700;line-height:1.35;overflow-wrap:anywhere}
+@media(max-width:900px){.unit-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.unit-grid{grid-template-columns:1fr;gap:10px}.unit-card{padding:14px}.unit-card h4{min-height:0;font-size:16px}.unit-card ul{font-size:14px}.unit-card li:not(.staff-member){padding:9px 11px}.unit-card .staff-member img{width:50px;height:50px}.unit-card .staff-member span{font-size:14px}}
+
+/* Membres : même hiérarchie visuelle pour les noms et les fonctions, lisible sur mobile */
+.member-card{align-items:center}
+.member-card>div{min-width:0}
+.member-card h4{margin:0;color:#103b83;font-size:14px;line-height:1.35;overflow-wrap:anywhere}
+.member-card p{margin:5px 0 0;color:#52617a;font-size:12px;line-height:1.45;overflow-wrap:anywhere}
+@media(max-width:700px){.member-card h4{font-size:13px}.member-card p{font-size:11px}}
+@media(max-width:460px){.member-card h4{font-size:14px}.member-card p{font-size:12px}}

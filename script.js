@@ -40,11 +40,13 @@ const pubmedSearchFor = (name) => {
     variants.add(`${initials} ${surname}`);
     variants.add(`${initials} ${surnamePair}`);
   }
-  variants.add(surname);
-  if (words.length > 1) {
-    variants.add(surnamePair);
-    variants.add(words.slice(-2).join('-'));
+  if (words.length > 2) {
+    const firstTwoInitials = words.slice(0, 2).map((word) => word[0]).join('');
+    const lastTwoNames = words.slice(-2).join('-');
+    variants.add(`${firstTwoInitials} ${lastTwoNames}`);
+    variants.add(`${firstTwoInitials} ${surname}`);
   }
+  if (words.length > 1) variants.add(words.slice(-2).join('-'));
   const terms = [...variants].map((variant) => `"${variant}"[Author]`);
   return `https://pubmed.ncbi.nlm.nih.gov/?term=${encodeURIComponent(terms.join(' OR '))}`;
 };
@@ -53,32 +55,46 @@ const profileLinksFor = (name) => {
   const query = encodeURIComponent(cleanName);
   const normalizedName = normalizeName(cleanName);
   const orcidId = Object.entries(orcidIds).find(([person]) => normalizedName.includes(person))?.[1];
+  const nameParts = cleanName.split(/\s+/).filter(Boolean);
+  const scholarVariants = new Set([`"${cleanName}"`]);
+  if (nameParts.length > 2) {
+    const initials = nameParts.slice(0, 2).map((part) => part[0]).join('');
+    scholarVariants.add(`"${initials} ${nameParts.slice(-2).join('-')}"`);
+    scholarVariants.add(`"${initials} ${nameParts.at(-1)}"`);
+  }
+  const scholarQuery = encodeURIComponent([...scholarVariants].join(' OR '));
   return [
     ['PubMed', pubmedSearchFor(cleanName), 'assets/logo-pubmed.png'],
     ['ORCID', orcidId ? `https://orcid.org/${orcidId}` : `https://orcid.org/orcid-search/search?searchQuery=${query}`, 'assets/logo-orcid.png'],
-    ['ResearchGate', `https://www.researchgate.net/search/researcher?q=${query}`, 'assets/logo-researchgate.png']
+    ['ResearchGate', `https://www.researchgate.net/search/researcher?q=${query}`, 'assets/logo-researchgate.png'],
+    ['Google Scholar', `https://scholar.google.com/scholar?q=${scholarQuery}`, 'assets/logo-google-scholar.png']
   ];
 };
 
-document.querySelectorAll('.member-grid .member-card').forEach((card) => {
-  const name = card.querySelector('h4')?.textContent.trim();
-  if (!name || normalizeName(name).includes('beatrice mozogo') || card.querySelector('.member-social-links')) return;
+const createSocialLinks = (name, className = 'member-social-links', includeOrcid = true) => {
   const links = document.createElement('div');
-  links.className = 'member-social-links';
-  profileLinksFor(name).forEach(([label, href, icon]) => {
+  links.className = className;
+  profileLinksFor(name).filter(([label]) => includeOrcid || label !== 'ORCID').forEach(([label, href, icon]) => {
     const link = document.createElement('a');
-    link.className = `social-link social-${label.toLowerCase()}`;
+    link.className = `social-link social-${label.toLowerCase().replace(/\s+/g, '-')}`;
     link.href = href;
     link.target = '_blank';
     link.rel = 'noopener noreferrer';
     link.setAttribute('aria-label', `${label} : ${name}`);
-    link.title = label;
+    link.title = `${label} — recherche par nom, résultats à vérifier`;
     const image = document.createElement('img');
     image.src = icon;
     image.alt = label;
     link.append(image);
     links.append(link);
   });
+  return links;
+};
+
+document.querySelectorAll('.member-grid .member-card').forEach((card) => {
+  const name = card.querySelector('h4')?.textContent.trim();
+  if (!name || normalizeName(name).includes('beatrice mozogo') || card.querySelector('.member-social-links')) return;
+  const links = createSocialLinks(name);
   card.querySelector('div')?.append(links);
 });
 
@@ -102,6 +118,7 @@ if (researcherGrid) {
     if (!name) return;
 
     const avatarInitials = name.split(/\s+/).filter((part) => !/^(Pr|Dr|Prof\.?|Docteur)$/i.test(part)).slice(0, 2).map((part) => part[0]).join('').toUpperCase();
+    item.classList.add('researcher-entry');
     const openProfile = document.createElement('button');
     openProfile.type = 'button';
     openProfile.className = 'researcher-open';
@@ -123,6 +140,7 @@ if (researcherGrid) {
     label.className = 'researcher-name';
     label.textContent = name;
     openProfile.append(label);
+    item.append(createSocialLinks(name, 'unit-social-links'));
 
     openProfile.addEventListener('click', () => {
       profileDialog.querySelector('#researcher-dialog-name').textContent = name;
@@ -207,20 +225,31 @@ if (mentoringGrid) {
         const records = data.records || [];
         if (category === 'PHD') {
           content.replaceChildren();
-          const names = data.phdNames || [];
-          if (names.length) {
-            const note = document.createElement('p');
-            note.className = 'student-list-message';
-            note.textContent = 'Personnes signalées comme PhD. Le classeur transmis ne précise pas ici les années ni les titres de thèse de doctorat.';
+          const groups = [
+            ['Thèses soutenues', data.phdCompleted || data.phdNames || [], '+'],
+            ['Thèses en cours', data.phdOngoing || [], '']
+          ];
+          groups.forEach(([title, names, suffix]) => {
+            if (!names.length) return;
+            const section = document.createElement('section');
+            section.className = 'student-year-group phd-group';
+            const heading = document.createElement('h3');
+            heading.textContent = `${title} (${names.length}${suffix})`;
             const list = document.createElement('ul');
-            list.className = 'student-name-list';
             names.forEach((name) => {
               const item = document.createElement('li');
-              item.textContent = name;
+              const strong = document.createElement('strong');
+              strong.textContent = name;
+              item.append(strong);
               list.append(item);
             });
-            content.append(note, list);
-          }
+            section.append(heading, list);
+            content.append(section);
+          });
+          const note = document.createElement('p');
+          note.className = 'student-list-message';
+          note.textContent = 'Liste en cours de complétion : les titres et années des thèses seront ajoutés progressivement.';
+          content.append(note);
           return;
         }
         const matchingRecords = records.filter((record) => record.category === category);

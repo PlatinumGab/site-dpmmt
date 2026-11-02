@@ -200,3 +200,13 @@
 .member-card p{margin:5px 0 0;color:#52617a;font-size:12px;line-height:1.45;overflow-wrap:anywhere}
 @media(max-width:700px){.member-card h4{font-size:13px}.member-card p{font-size:11px}}
 @media(max-width:460px){.member-card h4{font-size:14px}.member-card p{font-size:12px}}
+
+/* Liens de recherche bibliographique sous chaque chercheur */
+.unit-card .researcher-entry{display:block;padding:0;border:0;background:transparent}
+.unit-social-links{display:flex;align-items:center;gap:7px;margin:6px 2px 4px 8px;padding-left:8px}
+.unit-social-links a{display:inline-flex;align-items:center;justify-content:center;min-width:26px;min-height:25px;padding:2px;border-radius:5px}
+.unit-social-links a:hover,.unit-social-links a:focus-visible{outline:2px solid #078532;outline-offset:2px}
+.unit-social-links img{display:block;width:auto;height:20px;max-width:70px;border:0;border-radius:0;background:transparent;object-fit:contain;box-shadow:none}
+.social-google-scholar img{height:17px;max-width:90px}
+@media(max-width:600px){.unit-social-links{gap:9px;margin:5px 0 6px 12px}.unit-social-links img{height:22px;max-width:78px}.unit-social-links .social-google-scholar img{height:18px;max-width:96px}}
+.mentoring-grid .mentoring-trigger .mentoring-programs{color:#5a2a92;font-size:10px;font-style:normal;font-weight:700;line-height:1.3}

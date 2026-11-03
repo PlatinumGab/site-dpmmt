@@ -258,7 +258,7 @@ if (mentoringGrid) {
           const empty = document.createElement('p');
           empty.className = 'student-list-message';
           empty.textContent = category === 'DES'
-            ? 'Aucun travail de catégorie DES ne figure dans le classeur fourni.'
+            ? '7 travaux de DES encadrés. La liste détaillée (étudiants, titres et années) sera ajoutée prochainement.'
             : 'Aucun étudiant n’est renseigné pour cette catégorie dans le classeur fourni.';
           content.append(empty);
           return;

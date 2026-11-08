@@ -50,6 +50,33 @@ const pubmedSearchFor = (name) => {
   const terms = [...variants].map((variant) => `"${variant}"[Author]`);
   return `https://pubmed.ncbi.nlm.nih.gov/?term=${encodeURIComponent(terms.join(' OR '))}`;
 };
+const pubmedLinksByPerson = [
+  { match: 'bouyou akotet', links: [['Bouyou Akotet', 'https://pubmed.ncbi.nlm.nih.gov/?term=Bouyou+akotet&sort=date'], ['Akotet MKB', 'https://pubmed.ncbi.nlm.nih.gov/?term=Akotet+mkb&sort=date']] },
+  { match: 'mawili mboumba', links: [['Mawili Mboumba', 'https://pubmed.ncbi.nlm.nih.gov/?term=Mawili+mboumba&sort=date'], ['Mboumba DPM', 'https://pubmed.ncbi.nlm.nih.gov/?term=mboumba+dpm&sort=date']] },
+  { match: 'mbondoukwe', links: [['Mbondoukwe', 'https://pubmed.ncbi.nlm.nih.gov/?term=Mbondoukwe+&sort=date']] },
+  { match: 'ndong ngomo', links: [['Ndong Ngomo', 'https://pubmed.ncbi.nlm.nih.gov/?term=Ndong+Ngomo&sort=date']] },
+  { match: 'mbang nguema', links: [['Mbang Nguema', 'https://pubmed.ncbi.nlm.nih.gov/?term=Mbang+Nguema+&sort=date']] },
+  { match: 'moutombi ditombi', links: [['Moutombi Ditombi', 'https://pubmed.ncbi.nlm.nih.gov/?term=Moutombi+Ditombi&sort=date'], ['Ditombi B', 'https://pubmed.ncbi.nlm.nih.gov/?term=Ditombi+b&ac=yes&cauthor_id=None&user_filter=&schema=none&page=1&whatsnew=None&show_snippets=on&sort=date&sort_order=desc&format=summary&size=10']] },
+  { match: 'mihindou', links: [['C Mihindou', 'https://pubmed.ncbi.nlm.nih.gov/?term=C+mihindou&sort=date']] },
+  { match: 'moussavou mabicka', links: [['Moussavou Mabicka', 'https://pubmed.ncbi.nlm.nih.gov/?term=Moussavou+mabicka&sort=date'], ['Moussavou Mabika', 'https://pubmed.ncbi.nlm.nih.gov/?term=Moussavou+mabika&sort=date'], ['Article PubMed 39863850', 'https://pubmed.ncbi.nlm.nih.gov/39863850/']] },
+  { match: 'pongui ngondza', links: [['Pongui Ngondza B', 'https://pubmed.ncbi.nlm.nih.gov/?term=Pongui+Ngondza+&sort=date']] },
+  { match: 'moutongo mouandza', links: [['Moutongo Mouandza', 'https://pubmed.ncbi.nlm.nih.gov/?term=Moutongo+Mouandza&sort=date'], ['Moutongo R', 'https://pubmed.ncbi.nlm.nih.gov/?term=Moutongo+R&sort=date']] },
+  { match: 'sibi matotou', links: [['Sibi Matotou', 'https://pubmed.ncbi.nlm.nih.gov/?term=Sibi+matotou+&ac=yes&cauthor_id=None&user_filter=&schema=none&page=1&whatsnew=None&show_snippets=on&sort=date&sort_order=desc&format=summary&size=10']] },
+  { match: 'ndong akomezoghe', links: [['Ndong Akomezoghe', 'https://pubmed.ncbi.nlm.nih.gov/?term=Ndong+Akomezoghe+&sort=date']] },
+  { match: 'kono', links: [['Kono HN', 'https://pubmed.ncbi.nlm.nih.gov/?term=Kono+HN+&sort=date']] },
+  { match: 'mayandza', links: [['Mayandza C', 'https://pubmed.ncbi.nlm.nih.gov/?term=Mayandza+C&sort=date']] },
+  { match: 'mabika manfoumbi', links: [['Mabika Manfoumbi', 'https://pubmed.ncbi.nlm.nih.gov/?term=Mabika+Manfoumbi+&sort=date'], ['Mamfoumbi MM', 'https://pubmed.ncbi.nlm.nih.gov/?sort=date&term=Mamfoumbi+MM&cauthor_id=16940138']] },
+  { match: 'manomba boulingui', links: [['Manomba Boulingui', 'https://pubmed.ncbi.nlm.nih.gov/?term=Manomba+Boulingui&sort=date']] },
+  { match: 'ntsame owono', links: [['Ntsame Owono', 'https://pubmed.ncbi.nlm.nih.gov/?term=Ntsame+owono&sort=date']] },
+  { match: 'essomeyo ngue', links: [['Essomeyo Ngue', 'https://pubmed.ncbi.nlm.nih.gov/40248583/']] }
+];
+const pubmedLinksFor = (name) => {
+  const normalized = normalizeName(cleanAuthorName(name));
+  const matchedPerson = pubmedLinksByPerson.find(({ match }) => normalized.includes(match));
+  return matchedPerson
+    ? matchedPerson.links.map(([variant, href]) => [`PubMed · ${variant}`, href, 'assets/logo-pubmed.png'])
+    : [['PubMed', pubmedSearchFor(name), 'assets/logo-pubmed.png']];
+};
 const profileLinksFor = (name) => {
   const cleanName = cleanAuthorName(name);
   const query = encodeURIComponent(cleanName);
@@ -64,7 +91,7 @@ const profileLinksFor = (name) => {
   }
   const scholarQuery = encodeURIComponent([...scholarVariants].join(' OR '));
   return [
-    ['PubMed', pubmedSearchFor(cleanName), 'assets/logo-pubmed.png'],
+    ...pubmedLinksFor(cleanName),
     ['ORCID', orcidId ? `https://orcid.org/${orcidId}` : `https://orcid.org/orcid-search/search?searchQuery=${query}`, 'assets/logo-orcid.png'],
     ['ResearchGate', `https://www.researchgate.net/search/researcher?q=${query}`, 'assets/logo-researchgate.png'],
     ['Google Scholar', `https://scholar.google.com/scholar?q=${scholarQuery}`, 'assets/logo-google-scholar.png']
@@ -76,12 +103,12 @@ const createSocialLinks = (name, className = 'member-social-links', includeOrcid
   links.className = className;
   profileLinksFor(name).filter(([label]) => includeOrcid || label !== 'ORCID').forEach(([label, href, icon]) => {
     const link = document.createElement('a');
-    link.className = `social-link social-${label.toLowerCase().replace(/\s+/g, '-')}`;
+    link.className = `social-link ${label.startsWith('PubMed') ? 'social-pubmed' : `social-${label.toLowerCase().replace(/\s+/g, '-')}`}`;
     link.href = href;
     link.target = '_blank';
     link.rel = 'noopener noreferrer';
     link.setAttribute('aria-label', `${label} : ${name}`);
-    link.title = `${label} — recherche par nom, résultats à vérifier`;
+    link.title = `${label.startsWith('PubMed · ') ? label.replace('PubMed · ', 'PubMed : ') : label} — résultats à vérifier`;
     const image = document.createElement('img');
     image.src = icon;
     image.alt = label;
@@ -118,6 +145,7 @@ if (researcherGrid) {
     if (!name) return;
 
     const avatarInitials = name.split(/\s+/).filter((part) => !/^(Pr|Dr|Prof\.?|Docteur)$/i.test(part)).slice(0, 2).map((part) => part[0]).join('').toUpperCase();
+    item.classList.remove('staff-member');
     item.classList.add('researcher-entry');
     const openProfile = document.createElement('button');
     openProfile.type = 'button';
@@ -162,7 +190,7 @@ if (researcherGrid) {
       linksContainer.replaceChildren();
       links.forEach(([labelText, href, icon]) => {
         const link = document.createElement('a');
-        link.className = `social-link social-${labelText.toLowerCase()}`;
+        link.className = `social-link ${labelText.startsWith('PubMed') ? 'social-pubmed' : `social-${labelText.toLowerCase()}`}`;
         link.href = href;
         link.target = '_blank';
         link.rel = 'noopener noreferrer';

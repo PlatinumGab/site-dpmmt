@@ -1,0 +1,417 @@
+const menuButton = document.querySelector('.menu-toggle');
+const navigation = document.querySelector('#navigation');
+
+menuButton.addEventListener('click', () => {
+  const isOpen = menuButton.getAttribute('aria-expanded') === 'true';
+  menuButton.setAttribute('aria-expanded', String(!isOpen));
+  navigation.classList.toggle('open', !isOpen);
+});
+
+navigation.addEventListener('click', (event) => {
+  if (event.target.closest('a')) {
+    navigation.classList.remove('open');
+    menuButton.setAttribute('aria-expanded', 'false');
+  }
+});
+
+document.querySelector('#year').textContent = new Date().getFullYear();
+const orcidIds = {
+  'marielle karine bouyou akotet': '0000-0002-7992-4630',
+  'denise patricia mawili mboumba': '0000-0002-4554-4365',
+  'mbondoukwe': '0000-0002-4994-3355',
+  'bridy chesly moutombi ditombi': '0000-0001-7811-2334',
+  'jacques mari ndong ngomo': '0000-0002-3880-7323',
+  'bedrich pongui ngondza': '0000-0002-5109-3177',
+  'vanessa koumba lengongo': '0000-0002-5919-4511',
+  'ornella anaise mbang nguema': '0000-0002-6884-9428',
+  'cyrille bisseye': '0000-0002-6888-6317',
+  'patrick mickala': '0000-0002-5376-0906'
+};
+const normalizeName = (value) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[’']/g, '').toLowerCase().replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, ' ').trim();
+const cleanAuthorName = (value) => value.replace(/\b(?:Dr|Pr|Prof(?:esseur)?|Docteur|M(?:me|r|lle))\.?\s*/gi, '').replace(/\s+/g, ' ').trim();
+const pubmedSearchFor = (name) => {
+  const clean = cleanAuthorName(name).replace(/[’']/g, ' ').replace(/\s+/g, ' ').trim();
+  const words = clean.split(' ').filter(Boolean);
+  const initials = words.slice(0, -1).map((word) => word[0]).join('');
+  const surname = words.at(-1) || clean;
+  const surnamePair = words.slice(-2).join(' ');
+  const variants = new Set([clean, clean.replace(/-/g, ' '), clean.replace(/\s+/g, '-')]);
+  if (initials) {
+    variants.add(`${initials} ${surname}`);
+    variants.add(`${initials} ${surnamePair}`);
+  }
+  if (words.length > 2) {
+    const firstTwoInitials = words.slice(0, 2).map((word) => word[0]).join('');
+    const lastTwoNames = words.slice(-2).join('-');
+    variants.add(`${firstTwoInitials} ${lastTwoNames}`);
+    variants.add(`${firstTwoInitials} ${surname}`);
+  }
+  if (words.length > 1) variants.add(words.slice(-2).join('-'));
+  const terms = [...variants].map((variant) => `"${variant}"[Author]`);
+  return `https://pubmed.ncbi.nlm.nih.gov/?term=${encodeURIComponent(terms.join(' OR '))}`;
+};
+const pubmedLinksByPerson = [
+  { match: 'bouyou akotet', links: [['Bouyou Akotet', 'https://pubmed.ncbi.nlm.nih.gov/?term=Bouyou+akotet&sort=date'], ['Akotet MKB', 'https://pubmed.ncbi.nlm.nih.gov/?term=Akotet+mkb&sort=date']] },
+  { match: 'mawili mboumba', links: [['Mawili Mboumba', 'https://pubmed.ncbi.nlm.nih.gov/?term=Mawili+mboumba&sort=date'], ['Mboumba DPM', 'https://pubmed.ncbi.nlm.nih.gov/?term=mboumba+dpm&sort=date']] },
+  { match: 'mbondoukwe', links: [['Mbondoukwe', 'https://pubmed.ncbi.nlm.nih.gov/?term=Mbondoukwe+&sort=date']] },
+  { match: 'ndong ngomo', links: [['Ndong Ngomo', 'https://pubmed.ncbi.nlm.nih.gov/?term=Ndong+Ngomo&sort=date']] },
+  { match: 'mbang nguema', links: [['Mbang Nguema', 'https://pubmed.ncbi.nlm.nih.gov/?term=Mbang+Nguema+&sort=date']] },
+  { match: 'moutombi ditombi', links: [['Moutombi Ditombi', 'https://pubmed.ncbi.nlm.nih.gov/?term=Moutombi+Ditombi&sort=date'], ['Ditombi B', 'https://pubmed.ncbi.nlm.nih.gov/?term=Ditombi+b&ac=yes&cauthor_id=None&user_filter=&schema=none&page=1&whatsnew=None&show_snippets=on&sort=date&sort_order=desc&format=summary&size=10']] },
+  { match: 'mihindou', links: [['C Mihindou', 'https://pubmed.ncbi.nlm.nih.gov/?term=C+mihindou&sort=date']] },
+  { match: 'moussavou mabicka', links: [['Moussavou Mabicka', 'https://pubmed.ncbi.nlm.nih.gov/?term=Moussavou+mabicka&sort=date'], ['Moussavou Mabika', 'https://pubmed.ncbi.nlm.nih.gov/?term=Moussavou+mabika&sort=date'], ['Article PubMed 39863850', 'https://pubmed.ncbi.nlm.nih.gov/39863850/']] },
+  { match: 'pongui ngondza', links: [['Pongui Ngondza B', 'https://pubmed.ncbi.nlm.nih.gov/?term=Pongui+Ngondza+&sort=date']] },
+  { match: 'moutongo mouandza', links: [['Moutongo Mouandza', 'https://pubmed.ncbi.nlm.nih.gov/?term=Moutongo+Mouandza&sort=date'], ['Moutongo R', 'https://pubmed.ncbi.nlm.nih.gov/?term=Moutongo+R&sort=date']] },
+  { match: 'sibi matotou', links: [['Sibi Matotou', 'https://pubmed.ncbi.nlm.nih.gov/?term=Sibi+matotou+&ac=yes&cauthor_id=None&user_filter=&schema=none&page=1&whatsnew=None&show_snippets=on&sort=date&sort_order=desc&format=summary&size=10']] },
+  { match: 'ndong akomezoghe', links: [['Ndong Akomezoghe', 'https://pubmed.ncbi.nlm.nih.gov/?term=Ndong+Akomezoghe+&sort=date']] },
+  { match: 'kono', links: [['Kono HN', 'https://pubmed.ncbi.nlm.nih.gov/?term=Kono+HN+&sort=date']] },
+  { match: 'mayandza', links: [['Mayandza C', 'https://pubmed.ncbi.nlm.nih.gov/?term=Mayandza+C&sort=date']] },
+  { match: 'mabika manfoumbi', links: [['Mabika Manfoumbi', 'https://pubmed.ncbi.nlm.nih.gov/?term=Mabika+Manfoumbi+&sort=date'], ['Mamfoumbi MM', 'https://pubmed.ncbi.nlm.nih.gov/?sort=date&term=Mamfoumbi+MM&cauthor_id=16940138']] },
+  { match: 'manomba boulingui', links: [['Manomba Boulingui', 'https://pubmed.ncbi.nlm.nih.gov/?term=Manomba+Boulingui&sort=date']] },
+  { match: 'ntsame owono', links: [['Ntsame Owono', 'https://pubmed.ncbi.nlm.nih.gov/?term=Ntsame+owono&sort=date']] },
+  { match: 'essomeyo ngue', links: [['Essomeyo Ngue', 'https://pubmed.ncbi.nlm.nih.gov/40248583/']] }
+];
+const pubmedLinksFor = (name) => {
+  const normalized = normalizeName(cleanAuthorName(name).replace(/-/g, ' '));
+  const matchedPerson = pubmedLinksByPerson.find(({ match }) => normalized.includes(match));
+  return matchedPerson
+    ? matchedPerson.links.map(([variant, href]) => [`PubMed · ${variant}`, href, 'assets/logo-pubmed.png'])
+    : [['PubMed', pubmedSearchFor(name), 'assets/logo-pubmed.png']];
+};
+const profileLinksFor = (name) => {
+  const cleanName = cleanAuthorName(name);
+  const query = encodeURIComponent(cleanName);
+  const normalizedName = normalizeName(cleanName);
+  const orcidId = Object.entries(orcidIds).find(([person]) => normalizedName.includes(person))?.[1];
+  const nameParts = cleanName.split(/\s+/).filter(Boolean);
+  const scholarVariants = new Set([`"${cleanName}"`]);
+  if (nameParts.length > 2) {
+    const initials = nameParts.slice(0, 2).map((part) => part[0]).join('');
+    scholarVariants.add(`"${initials} ${nameParts.slice(-2).join('-')}"`);
+    scholarVariants.add(`"${initials} ${nameParts.at(-1)}"`);
+  }
+  const scholarQuery = encodeURIComponent([...scholarVariants].join(' OR '));
+  return [
+    ...pubmedLinksFor(cleanName),
+    ['ORCID', orcidId ? `https://orcid.org/${orcidId}` : `https://orcid.org/orcid-search/search?searchQuery=${query}`, 'assets/logo-orcid.png'],
+    ['ResearchGate', `https://www.researchgate.net/search/researcher?q=${query}`, 'assets/logo-researchgate.png'],
+    ['Google Scholar', `https://scholar.google.com/scholar?q=${scholarQuery}`, 'assets/logo-google-scholar.png']
+  ];
+};
+
+const createLinkElement = (label, href, icon, name) => {
+  const link = document.createElement('a');
+  link.className = `social-link ${label.startsWith('PubMed') ? 'social-pubmed' : `social-${label.toLowerCase().replace(/\s+/g, '-')}`}`;
+  link.href = href;
+  link.target = '_blank';
+  link.rel = 'noopener noreferrer';
+  link.setAttribute('aria-label', `${label} : ${name}`);
+  link.title = `${label.startsWith('PubMed · ') ? label.replace('PubMed · ', 'PubMed : ') : label} — résultats à vérifier`;
+  const image = document.createElement('img');
+  image.src = icon;
+  image.alt = label;
+  link.append(image);
+  return link;
+};
+
+const closePubmedMenus = (except) => {
+  document.querySelectorAll('.pubmed-menu-wrap.open').forEach((wrap) => {
+    if (wrap === except) return;
+    wrap.classList.remove('open');
+    wrap.querySelector('.pubmed-toggle')?.setAttribute('aria-expanded', 'false');
+    const menu = wrap.querySelector('.pubmed-menu');
+    if (menu) menu.hidden = true;
+  });
+};
+document.addEventListener('click', (event) => {
+  if (!event.target.closest('.pubmed-menu-wrap')) closePubmedMenus();
+});
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') closePubmedMenus();
+});
+
+const createPubmedMenu = (pubmedLinks, name) => {
+  const wrap = document.createElement('span');
+  wrap.className = 'pubmed-menu-wrap';
+  const toggle = document.createElement('button');
+  toggle.type = 'button';
+  toggle.className = 'social-link social-pubmed pubmed-toggle';
+  toggle.setAttribute('aria-haspopup', 'true');
+  toggle.setAttribute('aria-expanded', 'false');
+  toggle.setAttribute('aria-label', `PubMed : ${name} (${pubmedLinks.length} recherches)`);
+  toggle.title = `PubMed — ${pubmedLinks.length} recherches, cliquer pour choisir`;
+  const image = document.createElement('img');
+  image.src = pubmedLinks[0][2];
+  image.alt = 'PubMed';
+  const count = document.createElement('span');
+  count.className = 'pubmed-count';
+  count.textContent = pubmedLinks.length;
+  toggle.append(image, count);
+  const menu = document.createElement('div');
+  menu.className = 'pubmed-menu';
+  menu.hidden = true;
+  const heading = document.createElement('span');
+  heading.className = 'pubmed-menu-title';
+  heading.textContent = 'Rechercher sur PubMed :';
+  menu.append(heading);
+  pubmedLinks.forEach(([label, href]) => {
+    const item = document.createElement('a');
+    item.href = href;
+    item.target = '_blank';
+    item.rel = 'noopener noreferrer';
+    item.textContent = label.replace('PubMed · ', '');
+    menu.append(item);
+  });
+  toggle.addEventListener('click', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const willOpen = menu.hidden;
+    closePubmedMenus(wrap);
+    menu.hidden = !willOpen;
+    wrap.classList.toggle('open', willOpen);
+    toggle.setAttribute('aria-expanded', String(willOpen));
+  });
+  wrap.append(toggle, menu);
+  return wrap;
+};
+
+const createSocialLinks = (name, className = 'member-social-links', includeOrcid = true) => {
+  const links = document.createElement('div');
+  links.className = className;
+  const allLinks = profileLinksFor(name).filter(([label]) => includeOrcid || label !== 'ORCID');
+  const pubmedLinks = allLinks.filter(([label]) => label.startsWith('PubMed'));
+  if (pubmedLinks.length > 1) links.append(createPubmedMenu(pubmedLinks, name));
+  allLinks.forEach(([label, href, icon]) => {
+    if (pubmedLinks.length > 1 && label.startsWith('PubMed')) return;
+    links.append(createLinkElement(label, href, icon, name));
+  });
+  return links;
+};
+
+document.querySelectorAll('.member-grid .member-card').forEach((card) => {
+  const name = card.querySelector('h4')?.textContent.trim();
+  if (!name || normalizeName(name).includes('beatrice mozogo') || card.querySelector('.member-social-links')) return;
+  const links = createSocialLinks(name);
+  card.querySelector('div')?.append(links);
+});
+
+const researcherGrid = document.querySelector('.unit-grid');
+if (researcherGrid) {
+  const profileDialog = document.createElement('dialog');
+  profileDialog.className = 'researcher-dialog';
+  profileDialog.setAttribute('aria-labelledby', 'researcher-dialog-name');
+  profileDialog.innerHTML = '<button class="researcher-dialog-close" type="button" aria-label="Fermer">×</button><div class="researcher-dialog-content"><div class="researcher-dialog-photo"></div><div class="researcher-dialog-info"><p class="eyebrow">Profil du chercheur</p><h2 id="researcher-dialog-name"></h2><p class="researcher-dialog-help">Consulter ses publications et ses activités scientifiques :</p><div class="researcher-links"></div></div></div>';
+  document.body.append(profileDialog);
+
+  const closeButton = profileDialog.querySelector('.researcher-dialog-close');
+  closeButton.addEventListener('click', () => profileDialog.close());
+  profileDialog.addEventListener('click', (event) => {
+    if (event.target === profileDialog) profileDialog.close();
+  });
+
+  researcherGrid.querySelectorAll('.unit-card li').forEach((item) => {
+    const originalImage = item.querySelector('img');
+    const name = (item.querySelector('span')?.textContent || item.textContent).trim();
+    if (!name) return;
+
+    const avatarInitials = name.split(/\s+/).filter((part) => !/^(Pr|Dr|Prof\.?|Docteur|Mr|Mme|M\.)$/i.test(part)).slice(0, 2).map((part) => part[0]).join('').toUpperCase();
+    item.classList.remove('staff-member');
+    item.classList.add('researcher-entry');
+    const openProfile = document.createElement('button');
+    openProfile.type = 'button';
+    openProfile.className = 'researcher-open';
+    openProfile.setAttribute('aria-label', `Voir le profil de ${name}`);
+    if (originalImage) {
+      const portrait = originalImage.cloneNode(true);
+      portrait.alt = `Portrait de ${name}`;
+      openProfile.append(portrait);
+      item.replaceChildren(openProfile);
+    } else {
+      const initials = document.createElement('span');
+      initials.className = 'researcher-initials';
+      initials.setAttribute('aria-hidden', 'true');
+      initials.textContent = name.split(/\s+/).filter((part) => !/^(Pr|Dr|Prof\.?|Docteur|Mr|Mme|M\.)$/i.test(part)).slice(0, 2).map((part) => part[0]).join('').toUpperCase();
+      openProfile.append(initials);
+      item.replaceChildren(openProfile);
+    }
+    const label = document.createElement('span');
+    label.className = 'researcher-name';
+    label.textContent = name;
+    openProfile.append(label);
+    item.append(createSocialLinks(name, 'unit-social-links'));
+    const email = item.dataset.email;
+    if (email) {
+      const mailLink = document.createElement('a');
+      mailLink.className = 'member-email unit-email';
+      mailLink.href = `mailto:${email}`;
+      mailLink.textContent = `✉\u00a0${email}`;
+      item.append(mailLink);
+    }
+
+    openProfile.addEventListener('click', () => {
+      profileDialog.querySelector('#researcher-dialog-name').textContent = name;
+      const photoArea = profileDialog.querySelector('.researcher-dialog-photo');
+      photoArea.replaceChildren();
+      if (originalImage) {
+        const largePhoto = originalImage.cloneNode(true);
+        largePhoto.alt = `Portrait de ${name}`;
+        photoArea.append(largePhoto);
+      } else {
+        const fallback = document.createElement('span');
+        fallback.className = 'researcher-initials researcher-initials-large';
+        fallback.textContent = avatarInitials;
+        fallback.setAttribute('aria-hidden', 'true');
+        photoArea.append(fallback);
+      }
+      const links = profileLinksFor(name);
+      const linksContainer = profileDialog.querySelector('.researcher-links');
+      linksContainer.replaceChildren();
+      links.forEach(([labelText, href, icon]) => {
+        const link = document.createElement('a');
+        link.className = `social-link ${labelText.startsWith('PubMed') ? 'social-pubmed' : `social-${labelText.toLowerCase()}`}`;
+        link.href = href;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.setAttribute('aria-label', `${labelText} : ${name}`);
+        const image = document.createElement('img');
+        image.src = icon;
+        image.alt = labelText;
+        link.append(image);
+        const text = document.createElement('span');
+        text.textContent = labelText;
+        link.append(text);
+        linksContainer.append(link);
+      });
+      const dialogInfo = profileDialog.querySelector('.researcher-dialog-info');
+      dialogInfo.querySelector('.member-email')?.remove();
+      if (email) {
+        const dialogMail = document.createElement('a');
+        dialogMail.className = 'member-email researcher-dialog-email';
+        dialogMail.href = `mailto:${email}`;
+        dialogMail.textContent = `✉\u00a0${email}`;
+        dialogInfo.append(dialogMail);
+      }
+      profileDialog.showModal();
+    });
+  });
+}
+
+const mentoringGrid = document.querySelector('.mentoring-grid');
+if (mentoringGrid) {
+  const studentDialog = document.createElement('dialog');
+  studentDialog.className = 'student-list-dialog';
+  studentDialog.setAttribute('aria-labelledby', 'student-list-title');
+  studentDialog.innerHTML = '<button class="student-list-close" type="button" aria-label="Fermer">×</button><h2 id="student-list-title"></h2><div class="student-list-content"></div>';
+  document.body.append(studentDialog);
+
+  studentDialog.querySelector('.student-list-close').addEventListener('click', () => studentDialog.close());
+  studentDialog.addEventListener('click', (event) => {
+    if (event.target === studentDialog) studentDialog.close();
+  });
+
+  let studentRecordsPromise;
+  const loadStudentRecords = () => {
+    if (!studentRecordsPromise) {
+      studentRecordsPromise = fetch('assets/encadrements-etudiants.json')
+        .then((response) => {
+          if (!response.ok) throw new Error('Impossible de charger le fichier des encadrements.');
+          return response.json();
+        })
+        .then((data) => data);
+    }
+    return studentRecordsPromise;
+  };
+
+  const content = studentDialog.querySelector('.student-list-content');
+  mentoringGrid.querySelectorAll('[data-student-category]').forEach((trigger) => {
+    trigger.addEventListener('click', async () => {
+      const category = trigger.dataset.studentCategory;
+      const label = trigger.dataset.studentLabel || trigger.querySelector('b')?.textContent.trim() || 'Étudiants encadrés';
+      studentDialog.querySelector('#student-list-title').textContent = label;
+      content.replaceChildren();
+      const loading = document.createElement('p');
+      loading.className = 'student-list-message';
+      loading.textContent = 'Chargement de la liste…';
+      content.append(loading);
+      studentDialog.showModal();
+
+      try {
+        const data = await loadStudentRecords();
+        const records = data.records || [];
+        if (category === 'PHD') {
+          content.replaceChildren();
+          const groups = [
+            ['Thèses soutenues', data.phdCompleted || data.phdNames || [], '+'],
+            ['Thèses en cours', data.phdOngoing || [], '']
+          ];
+          groups.forEach(([title, names, suffix]) => {
+            if (!names.length) return;
+            const section = document.createElement('section');
+            section.className = 'student-year-group phd-group';
+            const heading = document.createElement('h3');
+            heading.textContent = `${title} (${names.length}${suffix})`;
+            const list = document.createElement('ul');
+            names.forEach((name) => {
+              const item = document.createElement('li');
+              const strong = document.createElement('strong');
+              strong.textContent = name;
+              item.append(strong);
+              list.append(item);
+            });
+            section.append(heading, list);
+            content.append(section);
+          });
+          const note = document.createElement('p');
+          note.className = 'student-list-message';
+          note.textContent = 'Liste en cours de complétion : les titres et années des thèses seront ajoutés progressivement.';
+          content.append(note);
+          return;
+        }
+        const matchingRecords = records.filter((record) => record.category === category);
+        content.replaceChildren();
+        if (!matchingRecords.length) {
+          const empty = document.createElement('p');
+          empty.className = 'student-list-message';
+          empty.textContent = category === 'DES'
+            ? '7 travaux de DES encadrés. La liste détaillée (étudiants, titres et années) sera ajoutée prochainement.'
+            : 'Aucun étudiant n’est renseigné pour cette catégorie dans le classeur fourni.';
+          content.append(empty);
+          return;
+        }
+
+        const groupedByYear = new Map();
+        matchingRecords.forEach((record) => {
+          const year = String(record.year || 'Année non renseignée');
+          if (!groupedByYear.has(year)) groupedByYear.set(year, []);
+          groupedByYear.get(year).push(record);
+        });
+
+        [...groupedByYear.entries()]
+          .sort(([yearA], [yearB]) => Number(yearB) - Number(yearA))
+          .forEach(([year, yearRecords]) => {
+            const section = document.createElement('section');
+            section.className = 'student-year-group';
+            const heading = document.createElement('h3');
+            heading.textContent = year;
+            const list = document.createElement('ul');
+            yearRecords.forEach((record) => {
+              const item = document.createElement('li');
+              const author = document.createElement('strong');
+              author.textContent = record.author || 'Auteur non renseigné';
+              const title = document.createElement('span');
+              title.textContent = record.title || 'Titre non renseigné';
+              item.append(author, title);
+              list.append(item);
+            });
+            section.append(heading, list);
+            content.append(section);
+          });
+      } catch (error) {
+        content.replaceChildren();
+        const message = document.createElement('p');
+        message.className = 'student-list-message student-list-error';
+        message.textContent = 'La liste ne peut pas être chargée pour le moment. Vérifiez que le fichier des encadrements a bien été ajouté au dossier assets.';
+        content.append(message);
+      }
+    });
+  });
+}

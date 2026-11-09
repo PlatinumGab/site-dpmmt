@@ -144,7 +144,7 @@ if (researcherGrid) {
     const name = (item.querySelector('span')?.textContent || item.textContent).trim();
     if (!name) return;
 
-    const avatarInitials = name.split(/\s+/).filter((part) => !/^(Pr|Dr|Prof\.?|Docteur)$/i.test(part)).slice(0, 2).map((part) => part[0]).join('').toUpperCase();
+    const avatarInitials = name.split(/\s+/).filter((part) => !/^(Pr|Dr|Prof\.?|Docteur|Mr|Mme|M\.)$/i.test(part)).slice(0, 2).map((part) => part[0]).join('').toUpperCase();
     item.classList.remove('staff-member');
     item.classList.add('researcher-entry');
     const openProfile = document.createElement('button');
@@ -160,7 +160,7 @@ if (researcherGrid) {
       const initials = document.createElement('span');
       initials.className = 'researcher-initials';
       initials.setAttribute('aria-hidden', 'true');
-      initials.textContent = name.split(/\s+/).filter((part) => !/^(Pr|Dr|Prof\.?|Docteur)$/i.test(part)).slice(0, 2).map((part) => part[0]).join('').toUpperCase();
+      initials.textContent = name.split(/\s+/).filter((part) => !/^(Pr|Dr|Prof\.?|Docteur|Mr|Mme|M\.)$/i.test(part)).slice(0, 2).map((part) => part[0]).join('').toUpperCase();
       openProfile.append(initials);
       item.replaceChildren(openProfile);
     }
@@ -169,6 +169,14 @@ if (researcherGrid) {
     label.textContent = name;
     openProfile.append(label);
     item.append(createSocialLinks(name, 'unit-social-links'));
+    const email = item.dataset.email;
+    if (email) {
+      const mailLink = document.createElement('a');
+      mailLink.className = 'member-email unit-email';
+      mailLink.href = `mailto:${email}`;
+      mailLink.textContent = `✉\u00a0${email}`;
+      item.append(mailLink);
+    }
 
     openProfile.addEventListener('click', () => {
       profileDialog.querySelector('#researcher-dialog-name').textContent = name;
@@ -204,6 +212,15 @@ if (researcherGrid) {
         link.append(text);
         linksContainer.append(link);
       });
+      const dialogInfo = profileDialog.querySelector('.researcher-dialog-info');
+      dialogInfo.querySelector('.member-email')?.remove();
+      if (email) {
+        const dialogMail = document.createElement('a');
+        dialogMail.className = 'member-email researcher-dialog-email';
+        dialogMail.href = `mailto:${email}`;
+        dialogMail.textContent = `✉\u00a0${email}`;
+        dialogInfo.append(dialogMail);
+      }
       profileDialog.showModal();
     });
   });

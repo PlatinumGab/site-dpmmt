@@ -71,7 +71,7 @@ const pubmedLinksByPerson = [
   { match: 'essomeyo ngue', links: [['Essomeyo Ngue', 'https://pubmed.ncbi.nlm.nih.gov/40248583/']] }
 ];
 const pubmedLinksFor = (name) => {
-  const normalized = normalizeName(cleanAuthorName(name));
+  const normalized = normalizeName(cleanAuthorName(name).replace(/-/g, ' '));
   const matchedPerson = pubmedLinksByPerson.find(({ match }) => normalized.includes(match));
   return matchedPerson
     ? matchedPerson.links.map(([variant, href]) => [`PubMed · ${variant}`, href, 'assets/logo-pubmed.png'])
@@ -98,22 +98,91 @@ const profileLinksFor = (name) => {
   ];
 };
 
+const createLinkElement = (label, href, icon, name) => {
+  const link = document.createElement('a');
+  link.className = `social-link ${label.startsWith('PubMed') ? 'social-pubmed' : `social-${label.toLowerCase().replace(/\s+/g, '-')}`}`;
+  link.href = href;
+  link.target = '_blank';
+  link.rel = 'noopener noreferrer';
+  link.setAttribute('aria-label', `${label} : ${name}`);
+  link.title = `${label.startsWith('PubMed · ') ? label.replace('PubMed · ', 'PubMed : ') : label} — résultats à vérifier`;
+  const image = document.createElement('img');
+  image.src = icon;
+  image.alt = label;
+  link.append(image);
+  return link;
+};
+
+const closePubmedMenus = (except) => {
+  document.querySelectorAll('.pubmed-menu-wrap.open').forEach((wrap) => {
+    if (wrap === except) return;
+    wrap.classList.remove('open');
+    wrap.querySelector('.pubmed-toggle')?.setAttribute('aria-expanded', 'false');
+    const menu = wrap.querySelector('.pubmed-menu');
+    if (menu) menu.hidden = true;
+  });
+};
+document.addEventListener('click', (event) => {
+  if (!event.target.closest('.pubmed-menu-wrap')) closePubmedMenus();
+});
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') closePubmedMenus();
+});
+
+const createPubmedMenu = (pubmedLinks, name) => {
+  const wrap = document.createElement('span');
+  wrap.className = 'pubmed-menu-wrap';
+  const toggle = document.createElement('button');
+  toggle.type = 'button';
+  toggle.className = 'social-link social-pubmed pubmed-toggle';
+  toggle.setAttribute('aria-haspopup', 'true');
+  toggle.setAttribute('aria-expanded', 'false');
+  toggle.setAttribute('aria-label', `PubMed : ${name} (${pubmedLinks.length} recherches)`);
+  toggle.title = `PubMed — ${pubmedLinks.length} recherches, cliquer pour choisir`;
+  const image = document.createElement('img');
+  image.src = pubmedLinks[0][2];
+  image.alt = 'PubMed';
+  const count = document.createElement('span');
+  count.className = 'pubmed-count';
+  count.textContent = pubmedLinks.length;
+  toggle.append(image, count);
+  const menu = document.createElement('div');
+  menu.className = 'pubmed-menu';
+  menu.hidden = true;
+  const heading = document.createElement('span');
+  heading.className = 'pubmed-menu-title';
+  heading.textContent = 'Rechercher sur PubMed :';
+  menu.append(heading);
+  pubmedLinks.forEach(([label, href]) => {
+    const item = document.createElement('a');
+    item.href = href;
+    item.target = '_blank';
+    item.rel = 'noopener noreferrer';
+    item.textContent = label.replace('PubMed · ', '');
+    menu.append(item);
+  });
+  toggle.addEventListener('click', (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const willOpen = menu.hidden;
+    closePubmedMenus(wrap);
+    menu.hidden = !willOpen;
+    wrap.classList.toggle('open', willOpen);
+    toggle.setAttribute('aria-expanded', String(willOpen));
+  });
+  wrap.append(toggle, menu);
+  return wrap;
+};
+
 const createSocialLinks = (name, className = 'member-social-links', includeOrcid = true) => {
   const links = document.createElement('div');
   links.className = className;
-  profileLinksFor(name).filter(([label]) => includeOrcid || label !== 'ORCID').forEach(([label, href, icon]) => {
-    const link = document.createElement('a');
-    link.className = `social-link ${label.startsWith('PubMed') ? 'social-pubmed' : `social-${label.toLowerCase().replace(/\s+/g, '-')}`}`;
-    link.href = href;
-    link.target = '_blank';
-    link.rel = 'noopener noreferrer';
-    link.setAttribute('aria-label', `${label} : ${name}`);
-    link.title = `${label.startsWith('PubMed · ') ? label.replace('PubMed · ', 'PubMed : ') : label} — résultats à vérifier`;
-    const image = document.createElement('img');
-    image.src = icon;
-    image.alt = label;
-    link.append(image);
-    links.append(link);
+  const allLinks = profileLinksFor(name).filter(([label]) => includeOrcid || label !== 'ORCID');
+  const pubmedLinks = allLinks.filter(([label]) => label.startsWith('PubMed'));
+  if (pubmedLinks.length > 1) links.append(createPubmedMenu(pubmedLinks, name));
+  allLinks.forEach(([label, href, icon]) => {
+    if (pubmedLinks.length > 1 && label.startsWith('PubMed')) return;
+    links.append(createLinkElement(label, href, icon, name));
   });
   return links;
 };
@@ -303,7 +372,7 @@ if (mentoringGrid) {
           const empty = document.createElement('p');
           empty.className = 'student-list-message';
           empty.textContent = category === 'DES'
-            ? '7 travaux de DES encadrés. La liste détaillée (étudiants, titres et années) sera ajoutée prochainement.'
+            ? '7 biologistes médicaux formés dans le cadre du DES de Biologie Médicale. La liste détaillée (noms, titres et années) sera ajoutée prochainement.'
             : 'Aucun étudiant n’est renseigné pour cette catégorie dans le classeur fourni.';
           content.append(empty);
           return;

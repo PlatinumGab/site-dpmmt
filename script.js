@@ -28,7 +28,7 @@ const orcidIds = {
   'patrick mickala': '0000-0002-5376-0906'
 };
 const normalizeName = (value) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[’']/g, '').toLowerCase().replace(/[^a-z0-9 ]/g, '').replace(/\s+/g, ' ').trim();
-const cleanAuthorName = (value) => value.replace(/\b(?:Dr|Pr|Prof(?:esseur)?|Docteur|M(?:me|r|lle))\.?\s*/gi, '').replace(/\s+/g, ' ').trim();
+const cleanAuthorName = (value) => value.replace(/\b(?:MCA|Dr|Pr|Prof(?:esseur)?|Docteur|M(?:me|r|lle))\.?\s*/gi, '').replace(/\s+/g, ' ').trim();
 const pubmedSearchFor = (name) => {
   const clean = cleanAuthorName(name).replace(/[’']/g, ' ').replace(/\s+/g, ' ').trim();
   const words = clean.split(' ').filter(Boolean);
@@ -213,7 +213,7 @@ if (researcherGrid) {
     const name = (item.querySelector('span')?.textContent || item.textContent).trim();
     if (!name) return;
 
-    const avatarInitials = name.split(/\s+/).filter((part) => !/^(Pr|Dr|Prof\.?|Docteur|Mr|Mme|M\.)$/i.test(part)).slice(0, 2).map((part) => part[0]).join('').toUpperCase();
+    const avatarInitials = name.split(/\s+/).filter((part) => !/^(Pr|Dr|MCA|Prof\.?|Docteur|Mr|Mme|M\.)$/i.test(part)).slice(0, 2).map((part) => part[0]).join('').toUpperCase();
     item.classList.remove('staff-member');
     item.classList.add('researcher-entry');
     const openProfile = document.createElement('button');
@@ -229,7 +229,7 @@ if (researcherGrid) {
       const initials = document.createElement('span');
       initials.className = 'researcher-initials';
       initials.setAttribute('aria-hidden', 'true');
-      initials.textContent = name.split(/\s+/).filter((part) => !/^(Pr|Dr|Prof\.?|Docteur|Mr|Mme|M\.)$/i.test(part)).slice(0, 2).map((part) => part[0]).join('').toUpperCase();
+      initials.textContent = name.split(/\s+/).filter((part) => !/^(Pr|Dr|MCA|Prof\.?|Docteur|Mr|Mme|M\.)$/i.test(part)).slice(0, 2).map((part) => part[0]).join('').toUpperCase();
       openProfile.append(initials);
       item.replaceChildren(openProfile);
     }
